@@ -1,70 +1,57 @@
-import React, { useEffect, useState } from "react";
+import React, { Component, useEffect, useState } from "react";
 import "./App.css";
-import Nav from "./components/Nav/Nav";
-import List from "./components/List/List";
-import axios from "axios";
-import { url } from "./api/api";
-import AddBooks from "./components/AddBooks/AddBooks";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-function App(){
-  const [books,setBooks]=useState([]);
-  const [title,setTitle]=useState("");
-  const[author,setAuthor]=useState("");
-  const[genre, setGenre]=useState("");
-  const [summary, setSummary]=useState("");
+function App() {
+  const [users, setUsers] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  console.log(books);
 
-  const getBooks = async ()=>{
-    await axios.get(url).then((response)=> setBooks(response.data));
-  };
-  useEffect(()=>{
-    getBooks();
-  },[]);
+  
+async function fetchUsersData() {
+  try {
+    const res = await fetch("https://jsonplaceholder.typicode.com/users");
+    const data = await res.json();
 
-  const updateBook=(id)=>{
-    //put request
+    setUsers(data);
+    setIsLoaded(true);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-    let formJSON ={
-      title: title,
-      author: author,
-      genre: genre,
-      summary: summary,
-    };
+useEffect(() => {
+  fetchUsersData();
+}, []);
 
-    axios.put(`${url}/${id}`, formJSON)
-    .then((response)=> console.log(response))
-    .catch((error)=> console.log(error));
-
-    window.location.reload();
-  };
-
-  const deleteBook=(id)=>{
-
-    axios.delete(`${url}/${id}`)
-    .then((response)=> console.log(response))
-    .catch((error)=>console.log(error));
-
-    window.location.reload();
-  };
-  return(
-    <div className="app">
-      <Nav/>
-      <div className="app_body">
-        <List books={books} deleteBook={deleteBook} updateBook={updateBook} />
-        <AddBooks 
-        title={title}
-        setTitle={setTitle}
-        author={author}
-        setAuthor={setAuthor}
-        genre={genre}
-        setGenre={setGenre}
-        summary={summary}
-        setSummary={setSummary}/>
-
-      </div>
+if (!isLoaded)
+  return (
+    <div>
+      <h1>Please wait for some time....</h1>
     </div>
-  )
+  );
+
+return (
+  <div className="App">
+    <h1>Fetch data in react function component</h1>
+    {users.map((user) => {
+      const { id, username, name, email } = user;
+      return (
+        <div key={id} className="col-6">
+          <div className="card">
+            <div className="container">
+              <h4>
+                <b>User Name: {username} </b>
+              </h4>
+              <p>Full Name: {name}</p>
+              <p>User_email {email} </p>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+);
 }
 
 export default App;
